@@ -51,8 +51,8 @@
         </div>
         <div>
             <label>
-                <input type="checkbox" name="edgesFilter" value="containsTask" checked />
-                containsTask
+                <input type="checkbox" name="edgesFilter" value="relatedToTask" checked />
+                relatedToTask
             </label>
         </div>
         <div>
@@ -148,7 +148,9 @@
             }
         ]);
 
-        const edges = new vis.DataSet([{
+        const edges = new vis.DataSet([
+            // pilot - pilot
+            {
                 from: 'p21',
                 to: 'p22',
                 relation: "comprises",
@@ -157,46 +159,39 @@
                     color: "green"
                 }
             },
+            // measure - task
             {
-                from: 'p21',
+                from: 't212',
                 to: 'm21',
                 relation: "belongsToMeasure",
                 arrows: "to",
                 color: {
-                    color: "red"
+                    color: "gray"
                 },
             },
             {
-                from: 'p21',
-                to: 'm22',
-                relation: "belongsToMeasure",
-                arrows: "to",
-                color: {
-                    color: "red"
-                },
-            },
-            {
-                from: 'p22',
+                from: 't213',
                 to: 'm21',
                 relation: "belongsToMeasure",
                 arrows: "to",
                 color: {
-                    color: "red"
+                    color: "gray"
                 },
             },
+            // pilot - task
             {
-                from: 'p22',
-                to: 'm22',
-                relation: "belongsToMeasure",
-                arrows: "to",
-                color: {
-                    color: "red"
-                },
-            },
-            {
-                from: 'm21',
+                from: 'p21',
                 to: 't212',
-                relation: "containsTask",
+                relation: "relatedToTask",
+                arrows: "to",
+                color: {
+                    color: "blue"
+                },
+            },
+            {
+                from: 'p21',
+                to: 't213',
+                relation: "relatedToTask",
                 arrows: "to",
                 color: {
                     color: "blue"
@@ -210,8 +205,8 @@
          */
         let nodeFilterValue = "";
         const edgesFilterValues = {
+            relatedToTask: true,
             belongsToMeasure: true,
-            containsTask: true,
             comprises: true
         };
 
