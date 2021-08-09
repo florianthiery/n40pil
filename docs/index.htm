@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>N4O Pilots example</title>
+
+    <script type="text/javascript" src="vis-network.min.js"></script>
+
+    <style type="text/css">
+        #mynetwork {
+            width: 1000px;
+            height: 600px;
+            border: 1px solid lightgray;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+                "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+                "Helvetica Neue", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        code {
+            font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+                monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>N4O Pilots (TA2)</h1>
+    <label>
+        Filter nodes
+        <select id="nodeFilterSelect">
+            <option value="">All nodes</option>
+            <option value="pilot">pilot</option>
+            <option value="measure">measure</option>
+            <option value="task">task</option>
+        </select>
+    </label>
+    <br />
+    <br />
+    <label>
+        Filter edges
+        <div>
+            <label>
+                <input type="checkbox" name="edgesFilter" value="belongsToMeasure" checked />
+                belongsToMeasure
+            </label>
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" name="edgesFilter" value="containsTask" checked />
+                containsTask
+            </label>
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" name="edgesFilter" value="comprises" checked />
+                comprises
+            </label>
+        </div>
+    </label>
+    <br />
+    <div id="mynetwork"></div>
+    <script type="text/javascript">
+        const nodeFilterSelector = document.getElementById("nodeFilterSelect");
+        const edgeFilters = document.getElementsByName("edgesFilter");
+
+        function startNetwork(data) {
+            const container = document.getElementById("mynetwork");
+            const options = {};
+            new vis.Network(container, data, options);
+        }
+
+        /**
+         * In this example we do not mutate nodes or edges source data.
+         */
+        const nodes = new vis.DataSet([
+            // pilots
+            {
+                id: 'p21',
+                label: "Pilot P2.1",
+                type: "pilot"
+            },
+            {
+                id: 'p22',
+                label: "Pilot P2.2",
+                type: "pilot"
+            },
+            {
+                id: 'p23',
+                label: "Pilot P2.3",
+                type: "pilot"
+            },
+            {
+                id: 'p24',
+                label: "Pilot P2.4",
+                type: "pilot"
+            },
+            {
+                id: 'p25',
+                label: "Pilot P2.5",
+                type: "pilot"
+            },
+            {
+                id: 'p26',
+                label: "Pilot P2.6",
+                type: "pilot"
+            },
+            {
+                id: 'p27',
+                label: "Pilot P2.7",
+                type: "pilot"
+            },
+            // measures (TA2)
+            {
+                id: 'm21',
+                label: "Measure M2.1",
+                type: "measure"
+            },
+            {
+                id: 'm22',
+                label: "Measure M2.2",
+                type: "measure"
+            },
+            {
+                id: 'm23',
+                label: "Measure M2.3",
+                type: "measure"
+            },
+            {
+                id: 'm24',
+                label: "Measure M2.4",
+                type: "measure"
+            },
+            // tasks (TA2)
+            {
+                id: 't212',
+                label: "Task T2.1.2",
+                type: "task"
+            },
+            {
+                id: 't213',
+                label: "Task T2.1.3",
+                type: "task"
+            }
+        ]);
+
+        const edges = new vis.DataSet([{
+                from: 'p21',
+                to: 'p22',
+                relation: "comprises",
+                arrows: "to",
+                color: {
+                    color: "green"
+                }
+            },
+            {
+                from: 'p21',
+                to: 'm21',
+                relation: "belongsToMeasure",
+                arrows: "to",
+                color: {
+                    color: "red"
+                },
+            },
+            {
+                from: 'p21',
+                to: 'm22',
+                relation: "belongsToMeasure",
+                arrows: "to",
+                color: {
+                    color: "red"
+                },
+            },
+            {
+                from: 'p22',
+                to: 'm21',
+                relation: "belongsToMeasure",
+                arrows: "to",
+                color: {
+                    color: "red"
+                },
+            },
+            {
+                from: 'p22',
+                to: 'm22',
+                relation: "belongsToMeasure",
+                arrows: "to",
+                color: {
+                    color: "red"
+                },
+            },
+            {
+                from: 'm21',
+                to: 't212',
+                relation: "containsTask",
+                arrows: "to",
+                color: {
+                    color: "blue"
+                },
+            }
+        ]);
+
+        /**
+         * filter values are updated in the outer scope.
+         * in order to apply filters to new values, DataView.refresh() should be called
+         */
+        let nodeFilterValue = "";
+        const edgesFilterValues = {
+            belongsToMeasure: true,
+            containsTask: true,
+            comprises: true
+        };
+
+        /*
+      filter function should return true or false
+      based on whether item in DataView satisfies a given condition.
+    */
+        const nodesFilter = (node) => {
+            if (nodeFilterValue === "") {
+                return true;
+            }
+            switch (nodeFilterValue) {
+                case "pilot":
+                    return node.type === "pilot";
+                case "measure":
+                    return node.type === "measure";
+                case "task":
+                    return node.type === "task";
+                default:
+                    return true;
+            }
+        };
+
+        const edgesFilter = (edge) => {
+            return edgesFilterValues[edge.relation];
+        };
+
+        const nodesView = new vis.DataView(nodes, {
+            filter: nodesFilter
+        });
+        const edgesView = new vis.DataView(edges, {
+            filter: edgesFilter
+        });
+
+        nodeFilterSelector.addEventListener("change", (e) => {
+            // set new value to filter variable
+            nodeFilterValue = e.target.value;
+            /*
+        refresh DataView,
+        so that its filter function is re-calculated with the new variable
+      */
+            nodesView.refresh();
+        });
+
+        edgeFilters.forEach((filter) =>
+            filter.addEventListener("change", (e) => {
+                const {
+                    value,
+                    checked
+                } = e.target;
+                edgesFilterValues[value] = checked;
+                edgesView.refresh();
+            })
+        );
+
+        startNetwork({
+            nodes: nodesView,
+            edges: edgesView
+        });
+    </script>
+</body>
+
+</html>
